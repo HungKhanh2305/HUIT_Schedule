@@ -1,0 +1,7 @@
+const form = document.querySelector('#schedule');
+if (form) {
+  const output = document.querySelector('#suggestions'); let timer, controller;
+  function filterRooms() { const branch = form.elements.branch_id.value; for (const option of form.elements.room_id.options) { if (!option.value) continue; option.hidden = option.dataset.branch !== branch; if (option.hidden && option.selected) form.elements.room_id.value = ''; } }
+  async function suggest() { clearTimeout(timer); timer = setTimeout(async () => { if (controller) controller.abort(); controller = new AbortController(); try { const response = await fetch('suggestions.php?' + new URLSearchParams(new FormData(form)), {signal:controller.signal}); if(!response.ok) throw new Error(); const data=await response.json(); output.replaceChildren(); const title=document.createElement('strong'); title.textContent='Giảng viên gợi ý'; output.append(title); if(!data.length){output.append(document.createTextNode(' — Chưa có kết quả. Kiểm tra thông tin lịch và khai báo chuyên môn trong Danh mục.'));return;} data.forEach(t=>{const button=document.createElement('button');button.type='button';button.className='suggestion-item';button.textContent=`${t.full_name}: ${t.reason}`;button.onclick=()=>{form.elements.teacher_id.value=t.id;};output.append(button);}); } catch(e){if(e.name!=='AbortError')output.textContent='Không thể tải gợi ý.';} },250); }
+  form.addEventListener('change',()=>{filterRooms();suggest();});form.addEventListener('input',suggest);filterRooms();suggest();
+}

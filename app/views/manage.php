@@ -1,0 +1,28 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Danh mục | HUIT Schedule Hub</title><link rel="stylesheet" href="assets/css/style.css"></head><body><div class="app"><aside class="sidebar"><a class="brand" href="index.php"><span class="brand-mark">H</span><span>HUIT <small>Schedule Hub</small></span></a><div class="sidebar-caption">Phòng đào tạo</div><nav><a href="index.php">▦ <span>Thời khóa biểu</span></a><a class="active" href="manage.php">▤ <span>Danh mục</span></a></nav><div class="sidebar-bottom">Lịch giảng dạy<br><strong>Đa cơ sở, một nơi quản lý.</strong></div></aside><main class="workspace"><header class="topbar"><span>Quản lý / Danh mục</span><a href="index.php">← Về thời khóa biểu</a></header><div class="content"><div class="page-heading"><div><p class="kicker">Phòng đào tạo</p><h1>Danh mục</h1><p>Chuẩn bị dữ liệu để phân công lịch giảng dạy.</p></div></div><div class="tabs"><?php foreach ($types as $key => $label):?><a class="<?=$type === $key ? 'selected' : ''?>" href="?type=<?=h($key)?>"><?=h($label)?></a><?php endforeach?></div><?php if ($error):?><div class="alert"><?=h($error)?></div><?php endif?><?php if (!empty($_SESSION['notice'])):?><div class="success"><?=h($_SESSION['notice'])?></div><?php unset($_SESSION['notice']);endif?><div class="manage-layout"><section class="panel"><div class="panel-heading"><div><h2><?=h($types[$type])?></h2><p><?=count($rows)?> mục</p></div></div><div class="table-wrap"><table><thead><tr><?php if ($type === 'teachers'):?><th>Giảng viên</th><th>Liên hệ / chuyên môn</th><?php elseif ($type === 'branches'):?><th>Cơ sở</th><th>Địa chỉ</th><?php elseif ($type === 'rooms'):?><th>Phòng</th><th>Cơ sở / sức chứa</th><?php elseif ($type === 'subjects'):?><th>Mã</th><th>Học phần</th><?php elseif ($type === 'terms'):?><th>Học kỳ</th><th>Thời gian</th><?php elseif ($type === 'travel'):?><th>Hai cơ sở</th><th>Thời gian</th><?php else:?><th>Giảng viên</th><th>Học phần</th><?php endif?><th></th></tr></thead><tbody><?php foreach ($rows as $r):?><tr><?php if ($type === 'teachers'):?><td><strong><?=h($r['full_name'])?></strong><br><?=h($r['email'])?></td><td><?=h($r['phone'])?><br><?=h($r['expertise'])?></td><?php elseif ($type === 'branches'):?><td><?=h($r['branch_name'])?></td><td><?=h($r['address'])?></td><?php elseif ($type === 'rooms'):?><td><?=h($r['name'])?></td><td><?=h($r['branch_name'])?> / <?=h($r['capacity'] ?? '—')?></td><?php elseif ($type === 'subjects'):?><td><?=h($r['code'])?></td><td><?=h($r['name'])?></td><?php elseif ($type === 'terms'):?><td><?=h($r['name'])?></td><td><?=h($r['start_date'])?> — <?=h($r['end_date'])?></td><?php elseif ($type === 'travel'):?><td><?=h($r['origin'])?> ↔ <?=h($r['destination'])?></td><td><?=h($r['minutes'])?> phút</td><?php else:?><td><?=h($r['full_name'])?></td><td><?=h($r['name'])?></td><?php endif?><td class="actions"><?php if (isset($r['id'])):?><a href="?type=<?=h($type)?>&edit=<?=$r['id']?>#edit-form">Sửa</a><form method="post" onsubmit="return confirm('Xóa mục này?')"><input type="hidden" name="csrf" value="<?=h($_SESSION['csrf'])?>"><input type="hidden" name="id" value="<?=$r['id']?>"><button name="action" value="delete" class="link danger">Xóa</button></form><?php elseif ($type === 'assignments'):?><form method="post"><input type="hidden" name="csrf" value="<?=h($_SESSION['csrf'])?>"><input type="hidden" name="teacher_id" value="<?=$r['teacher_id']?>"><input type="hidden" name="subject_id" value="<?=$r['subject_id']?>"><button class="link danger" name="action" value="remove_assignment">Xóa</button></form><?php endif?></td></tr><?php endforeach?><?php if (!$rows):?><tr><td colspan="3" class="empty">Chưa có dữ liệu. Thêm mục đầu tiên ở biểu mẫu bên cạnh.</td></tr><?php endif?></tbody></table></div></section><section class="panel form-panel" id="edit-form"><h2><?=empty($edit) ? 'Thêm mới' : 'Chỉnh sửa'?></h2><p>Thông tin <?=h(mb_strtolower($types[$type]))?>.</p><form method="post" class="stack"><input type="hidden" name="csrf" value="<?=h($_SESSION['csrf'])?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?=h($edit['id'] ?? '')?>"><?php if ($type === 'teachers') {
+    field('full_name', 'Họ và tên');
+    field('email', 'Email', 'email');
+    field('phone', 'Số điện thoại', 'text', false);
+    field('expertise', 'Chuyên môn');
+    field('password', empty($edit) ? 'Mật khẩu (ít nhất 8 ký tự)' : 'Mật khẩu mới (để trống nếu giữ nguyên)', 'password', empty($edit));
+} elseif ($type === 'branches') {
+    field('branch_name', 'Tên cơ sở');
+    field('address', 'Địa chỉ');
+} elseif ($type === 'rooms') {
+    choose('branch_id', 'Cơ sở', $branches, 'branch_name');
+    field('name', 'Tên phòng');
+    field('capacity', 'Sức chứa', 'number', false);
+} elseif ($type === 'subjects') {
+    field('code', 'Mã học phần');
+    field('name', 'Tên học phần');
+} elseif ($type === 'terms') {
+    field('name', 'Tên học kỳ');
+    field('start_date', 'Bắt đầu', 'date');
+    field('end_date', 'Kết thúc', 'date');
+} elseif ($type === 'travel') {
+    choose('branch_from', 'Cơ sở đi', $branches, 'branch_name');
+    choose('branch_to', 'Cơ sở đến', $branches, 'branch_name');
+    field('minutes', 'Thời gian (phút)', 'number');
+} else {
+    choose('teacher_id', 'Giảng viên', $teachers, 'full_name');
+    choose('subject_id','Học phần',$subjects,'name');
+}?><button class="primary">Lưu thông tin</button><?php if ($edit):?><a href="?type=<?=h($type)?>">Hủy chỉnh sửa</a><?php endif?></form></section></div></div></main></div></body></html>
