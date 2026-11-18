@@ -8,9 +8,22 @@
 2. Mở Terminal của Laragon tại thư mục dự án, chạy `composer install`. Cần PHP 8.1 trở lên với các extension `pdo_mysql` và `mbstring`.
 3. Sao chép `.env.example` thành `.env`, sửa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` theo MySQL. SQL mẫu tạo database `huit_db`; nếu đổi tên database hãy sửa cả file SQL trước khi import.
 4. Import `database/database.sql` bằng HeidiSQL hoặc chạy `mysql -u root < database/database.sql` trong terminal hỗ trợ chuyển hướng. Tài khoản cần quyền tạo database.
-5. Chạy `php scripts/seed.php` để tạo dữ liệu mẫu; script chỉ chạy trên các bảng trống. Đăng nhập quản trị bằng `admin` / `demo1234`, hoặc giảng viên bằng `giangvien1@huit.edu.vn` / `demo1234`. Các giảng viên mẫu khác dùng email `giangvien2@huit.edu.vn` đến `giangvien5@huit.edu.vn` và cùng mật khẩu.
+5. Chạy `php scripts/migrate.php`, sau đó chạy `php scripts/seed.php` để tạo dữ liệu mẫu và `php scripts/backfill.php` để tạo danh mục từ lịch mẫu. Script tạo dữ liệu mẫu chỉ chạy khi các bảng liên quan còn trống.
 
-Đây là tài khoản mẫu cho môi trường phát triển: đổi mật khẩu trong cơ sở dữ liệu trước khi triển khai thực tế. Không đưa `.env` hoặc `vendor` lên Git. Gợi ý chuyên môn dựa trên từ khóa chung từ ba ký tự trở lên, điểm ưu tiên lịch cùng cơ sở và giảm khoảng trống; đây là gợi ý, không tính thời gian di chuyển thực tế. Lịch lặp hàng tuần trong khoảng ngày bắt đầu–kết thúc và bộ lọc tuần/tháng hiển thị các lịch có khoảng áp dụng giao với kỳ được chọn.
+## Tài khoản kiểm thử
+
+Các tài khoản sau được tạo khi chạy thành công `php scripts/seed.php` trên cơ sở dữ liệu trống:
+
+| Vai trò khi đăng nhập | Tên đăng nhập / Email | Mật khẩu mẫu |
+| --- | --- | --- |
+| Phòng đào tạo | `admin` | `demo1234` |
+| Giảng viên | `giangvien1@huit.edu.vn` | `demo1234` |
+| Giảng viên | `giangvien2@huit.edu.vn` | `demo1234` |
+| Giảng viên | `giangvien3@huit.edu.vn` | `demo1234` |
+| Giảng viên | `giangvien4@huit.edu.vn` | `demo1234` |
+| Giảng viên | `giangvien5@huit.edu.vn` | `demo1234` |
+
+Đây là tài khoản mẫu cho môi trường phát triển. Nếu đã đổi mật khẩu hoặc cơ sở dữ liệu đã có dữ liệu thì tài khoản thực tế có thể khác; script không ghi đè dữ liệu cũ. Đổi mật khẩu trước khi triển khai thực tế và không đưa `.env` hoặc `vendor/` lên Git.
 
 ## Kiểm tra
 
@@ -26,14 +39,14 @@ Thời khóa biểu tuần hiển thị từng buổi, cho phép quản trị đ
 
 Trên cấu hình Laragon hiện tại, Apache chạy cổng 8080: truy cập `http://localhost:8080/huit-schedule/`.
 
-## C?u tr?c d? ?n
+## Cấu trúc dự án
 
-- `index.php`, `manage.php`, `suggestions.php`: c?c ?i?m truy c?p gi? nguy?n ???ng d?n Laragon.
-- `app/bootstrap.php`: k?t n?i c? s? d? li?u, phi?n ??ng nh?p v? c?c h?m d?ng chung.
-- `app/controllers/`: x? l? y?u c?u v? chu?n b? d? li?u cho t?ng trang.
-- `app/views/`: giao di?n PHP c?a l?ch v? danh m?c.
-- `assets/css/`, `assets/js/`: giao di?n v? t??ng t?c tr?n tr?nh duy?t.
-- `database/`: c?u tr?c c? s? d? li?u ban ??u.
-- `scripts/`: c?p nh?t c?u tr?c, t?o d? li?u m?u v? chuy?n d? li?u c?; ch? ch?y qua d?ng l?nh.
+- `index.php`, `manage.php`, `suggestions.php`: các điểm truy cập giữ nguyên đường dẫn Laragon.
+- `app/bootstrap.php`: kết nối cơ sở dữ liệu, phiên đăng nhập và các hàm dùng chung.
+- `app/controllers/`: xử lý yêu cầu và chuẩn bị dữ liệu cho từng trang.
+- `app/views/`: giao diện PHP của lịch và danh mục.
+- `assets/css/`, `assets/js/`: giao diện và tương tác trên trình duyệt.
+- `database/`: cấu trúc cơ sở dữ liệu ban đầu.
+- `scripts/`: cập nhật cấu trúc, tạo dữ liệu mẫu và chuyển dữ liệu cũ; chỉ chạy qua dòng lệnh.
 
-C?c th? m?c `app/` v? `database/` ???c ch?n truy c?p tr?c ti?p b?ng c?u h?nh Apache `.htaccess`.
+Các thư mục `app/` và `database/` được chặn truy cập trực tiếp bằng cấu hình Apache `.htaccess`.
